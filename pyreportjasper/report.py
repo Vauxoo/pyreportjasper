@@ -38,6 +38,10 @@ class Report:
 
             if self.config.jvm_classpath is None:
                 jpype.startJVM("-Djava.system.class.loader=org.update4j.DynamicClassLoader",
+                               "-XX:InitialHeapSize=512M",
+                               "-XX:CompressedClassSpaceSize=64M",
+                               "-XX:MaxMetaspaceSize=128M",
+                               "-XX:+UseConcMarkSweepGC",
                                "-Xmx{}".format(self.config.jvm_maxmem),
                                classpath=classpath)
 
