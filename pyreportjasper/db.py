@@ -29,6 +29,7 @@ class Db:
         self.JRLoader = jpype.JPackage('net').sf.jasperreports.engine.util.JRLoader
         self.StringEscapeUtils = jpype.JPackage('org').apache.commons.lang.StringEscapeUtils
         self.File = jpype.JPackage('java').io.File
+        self.ByteArrayInputStream = jpype.JPackage('java').io.ByteArrayInputStream
 
     def get_csv_datasource(self, config: Config):
         ds = self.JRCsvDataSource(self.get_data_file_input_stream(config), config.csvCharset)
@@ -52,7 +53,15 @@ class Db:
         return jpype.JObject(ds, self.JsonQLDataSource)
 
     def get_data_file_input_stream(self, config: Config):
-        return self.JRLoader.getInputStream(self.File(config.dataFile))
+        data_file = config.dataFile
+        if isinstance(data_file, str):
+            with open(data_file, 'rb') as file:
+                input_stream = file.read()
+        elif isinstance(data_file, bytes):
+            input_stream = data_file
+        else:
+            raise Exception('data_source type %s not supported' % type(data_file))
+        return self.ByteArrayInputStream(input_stream)
 
     def get_connection(self, config: Config):
         dbtype = config.dbType

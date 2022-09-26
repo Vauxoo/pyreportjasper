@@ -82,6 +82,7 @@ class Report:
         self.SimpleCsvMetadataExporterConfiguration = jpype.JPackage('net').sf.jasperreports.export.SimpleCsvMetadataExporterConfiguration
         self.JRSaver = jpype.JPackage('net').sf.jasperreports.engine.util.JRSaver
         self.File = jpype.JPackage('java').io.File
+        self.ByteArrayInputStream = jpype.JPackage('java').io.ByteArrayInputStream
         self.ApplicationClasspath = jpype.JPackage('br').com.acesseonline.classpath.ApplicationClasspath
 
         if self.config.useJaxen:
@@ -111,7 +112,9 @@ class Report:
 
         try:
             # This fails in case of an jrxml file
-            j_object = self.jvJRLoader.loadObject(self.File(input_file))
+            with open(input_file, 'rb') as file:
+                input_stream = file.read()
+            j_object = self.jvJRLoader.loadObject(self.ByteArrayInputStream(input_stream))
             cast_error = True
             try:
                 self.jasper_report = jpype.JObject(j_object, self.JasperReport)
@@ -132,14 +135,19 @@ class Report:
                 raise NameError('input file: {0} is not of a valid type'.format(self.input_file))
         except Exception:
             try:
-                self.jasper_design = self.JRXmlLoader.load(input_file)
+                with open(input_file, 'rb') as file:
+                    input_stream = file.read()
+                self.jasper_design = self.JRXmlLoader.load(self.ByteArrayInputStream(input_stream))
                 self.initial_input_type = 'JASPER_DESIGN'
                 self.compile()
             except Exception as ex:
                 raise NameError('input file: {0} is not a valid jrxml file:'.format(str(ex)))
 
     def compile(self):
-        self.jasper_report = self.jvJasperCompileManager.compileReport(self.input_file)
+        # TODO: Avoid WARNING at first loading when compiling design into report.
+        # Illegal reflective access by net.sf.jasperreports.engine.util.ClassUtils
+        # to constructor com.sun.org.apache.xerces.internal.util.XMLGrammarPoolImpl()
+        self.jasper_report = self.jvJasperCompileManager.compileReport(self.jasper_design)
         if self.config.is_write_jasper():
             if self.config.output:
                 base = os.path.splitext(self.config.output)[0]
@@ -365,4 +373,3 @@ class Report:
                 jpype.addClassPath(dir_or_jar)
         except Exception as ex:
             raise NameError("Error adding class path: {}".format(ex))
-
