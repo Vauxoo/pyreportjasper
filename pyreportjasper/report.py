@@ -5,7 +5,6 @@
 #
 import os
 import jpype
-import time
 from pyreportjasper.config import Config
 from pyreportjasper.db import Db
 
@@ -46,13 +45,13 @@ class Report:
                                classpath=classpath)
 
         self.Locale = jpype.JPackage('java').util.Locale
+        self.String = jpype.JPackage('java').lang.String
         self.jvJRLoader = jpype.JPackage('net').sf.jasperreports.engine.util.JRLoader
         self.JasperReport = jpype.JPackage('net').sf.jasperreports.engine.JasperReport
         self.JasperPrint = jpype.JPackage('net').sf.jasperreports.engine.JasperPrint
         self.JRXmlLoader = jpype.JPackage('net').sf.jasperreports.engine.xml.JRXmlLoader
         self.jvJasperCompileManager = jpype.JPackage('net').sf.jasperreports.engine.JasperCompileManager
         self.LocaleUtils = jpype.JPackage('org').apache.commons.lang.LocaleUtils
-        self.Locale = jpype.JPackage('java').util.Locale
         self.jvJasperFillManager = jpype.JPackage('net').sf.jasperreports.engine.JasperFillManager
         self.JREmptyDataSource = jpype.JPackage('net').sf.jasperreports.engine.JREmptyDataSource
         self.JasperExportManager = jpype.JPackage('net').sf.jasperreports.engine.JasperExportManager
@@ -83,6 +82,7 @@ class Report:
         self.JRSaver = jpype.JPackage('net').sf.jasperreports.engine.util.JRSaver
         self.File = jpype.JPackage('java').io.File
         self.ByteArrayInputStream = jpype.JPackage('java').io.ByteArrayInputStream
+        self.ByteArrayOutputStream = jpype.JPackage('java').io.ByteArrayOutputStream
         self.ApplicationClasspath = jpype.JPackage('br').com.acesseonline.classpath.ApplicationClasspath
 
         if self.config.useJaxen:
@@ -239,8 +239,21 @@ class Report:
         except Exception as ex:
             raise NameError('Unable to create outputStream to {}: {}'.format(output_path, str(ex)))
 
+    def get_output_stream_pdf(self):
+        output_stream = self.ByteArrayOutputStream()
+        self.JasperExportManager.exportReportToPdfStream(self.jasper_print, output_stream)
+        return output_stream
+
+    def fetch_pdf_report(self):
+        output_stream_pdf = self.get_output_stream_pdf()
+        res = self.String(output_stream_pdf.toByteArray(), 'ISO-8859-1')
+        return bytes(str(res), 'ISO-8859-1')
+
+
     def export_pdf(self):
-        self.JasperExportManager.exportReportToPdfStream(self.jasper_print, self.get_output_stream('.pdf'))
+        output_stream = self.get_output_stream('.pdf')
+        output_stream_pdf = self.get_output_stream_pdf()
+        output_stream_pdf.writeTo(output_stream)
 
     def export_rtf(self):
         exporter = self.JRRtfExporter()

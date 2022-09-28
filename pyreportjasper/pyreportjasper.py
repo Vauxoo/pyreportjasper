@@ -131,6 +131,11 @@ class PyReportJasper:
         else:
             return True
 
+    def instantiate_report(self):
+        report = Report(self.config, self.config.input)
+        report.fill()
+        return report
+
     def process_report(self):
         error = None
         base_input = os.path.splitext(self.config.input)
@@ -141,11 +146,11 @@ class PyReportJasper:
 
         if os.path.isfile(self.config.input):
             try:
-                report = Report(self.config, self.config.input)
-                report.fill()
+                report = self.instantiate_report()
                 try:
                     formats = self.config.outputFormats
                     for f in formats:
+                        # NOTE: apply design patter here
                         if f == 'pdf':
                             report.export_pdf()
                         elif f == 'rtf':
@@ -180,8 +185,7 @@ class PyReportJasper:
             error = NameError('Error: not a file: {}'.format(self.config.input))
         if error:
             raise error
-        else:
-            return True
+        return True
 
     def list_report_params(self):
         report = Report(self.config, self.config.input)
