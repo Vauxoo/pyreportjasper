@@ -112,9 +112,7 @@ class Report:
 
         try:
             # This fails in case of an jrxml file
-            with open(input_file, 'rb') as file:
-                input_stream = file.read()
-            j_object = self.jvJRLoader.loadObject(self.ByteArrayInputStream(input_stream))
+            j_object = self.jvJRLoader.loadObject(self.ByteArrayInputStream(input_file))
             cast_error = True
             try:
                 self.jasper_report = jpype.JObject(j_object, self.JasperReport)
@@ -135,9 +133,7 @@ class Report:
                 raise NameError('input file: {0} is not of a valid type'.format(self.input_file))
         except Exception:
             try:
-                with open(input_file, 'rb') as file:
-                    input_stream = file.read()
-                self.jasper_design = self.JRXmlLoader.load(self.ByteArrayInputStream(input_stream))
+                self.jasper_design = self.JRXmlLoader.load(self.ByteArrayInputStream(input_file))
                 self.initial_input_type = 'JASPER_DESIGN'
                 self.compile()
             except Exception as ex:
