@@ -42,7 +42,7 @@ class PyReportJasper:
     METHODS = ('GET', 'POST', 'PUT')
 
     def config(self, input_file, output_file=False, output_formats=['pdf'], parameters={}, db_connection={},
-               locale='pt_BR', resource=None):
+               locale='en_US', resource=None):
         if not input_file:
             raise NameError('No input file!')
         if isinstance(output_formats, list):
@@ -199,7 +199,7 @@ class PyReportJasper:
         return list_param
 
     def process(self, input_file, output_file=False, format_list=['pdf'],
-                parameters={}, db_connection={}, locale='pt_BR', resource=""):
+                parameters={}, db_connection={}, locale='en_US', resource=""):
         warnings.warn("process is deprecated - use config and then process_report instead. See the documentation "
                       "https://pyreportjasper.readthedocs.io",
                       DeprecationWarning)
