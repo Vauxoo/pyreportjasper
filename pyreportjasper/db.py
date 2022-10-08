@@ -53,15 +53,7 @@ class Db:
         return jpype.JObject(ds, self.JsonQLDataSource)
 
     def get_data_file_input_stream(self, config: Config):
-        data_file = config.dataFile
-        if isinstance(data_file, str):
-            with open(data_file, 'rb') as file:
-                input_stream = file.read()
-        elif isinstance(data_file, bytes):
-            input_stream = data_file
-        else:
-            raise Exception('data_source type %s not supported' % type(data_file))
-        return self.ByteArrayInputStream(input_stream)
+        return self.ByteArrayInputStream(config.dataFile)
 
     def get_connection(self, config: Config):
         dbtype = config.dbType

@@ -41,7 +41,7 @@ class PyReportJasper:
 
     METHODS = ('GET', 'POST', 'PUT')
 
-    def config(self, input_file, output_file=False, output_formats=['pdf'], parameters={}, db_connection={},
+    def config(self, input_file, output_file=False, subreport_file=False, output_formats=['pdf'], parameters={}, db_connection={},
                locale='en_US', resource=None):
         if not input_file:
             raise NameError('No input file!')
@@ -52,6 +52,7 @@ class PyReportJasper:
             raise NameError("'output_formats' value is not list!")
         self.config = Config()
         self.config.input = input_file
+        self.config.subreport_file = subreport_file
         self.config.locale = locale
         self.config.resource = resource
         self.config.outputFormats = output_formats

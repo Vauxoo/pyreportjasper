@@ -138,6 +138,13 @@ class Report:
                 self.compile()
             except Exception as ex:
                 raise NameError('input file: {0} is not a valid jrxml file:'.format(str(ex)))
+        self.subreport_jasper = None
+        if self.config.subreport_file:
+            try:
+                subreport_jasper_design = self.JRXmlLoader.load(self.config.subreport_file)
+                self.subreport_jasper = self.jvJasperCompileManager.compileReport(subreport_jasper_design)
+            except Exception as ex:
+                raise NameError('input file: {0} is not a valid jrxml file:'.format(str(ex)))
 
     def compile(self):
         # TODO: Avoid WARNING at first loading when compiling design into report.
@@ -172,6 +179,9 @@ class Report:
 
     def fill_internal(self):
         parameters = self.HashMap()
+        if self.subreport_jasper:
+            parameters.put('subreportParameter', self.subreport_jasper)
+
         for key in self.config.params:
             parameters.put(key, self.config.params[key])
         try:
